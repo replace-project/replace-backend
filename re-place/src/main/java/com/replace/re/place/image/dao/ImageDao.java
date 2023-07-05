@@ -20,12 +20,13 @@ import java.util.List;
 @Repository
 public class ImageDao {
 
-    private final JdbcTemplate jdbcTemplate;
-
     @Autowired
-    public ImageDao(DataSource dataSource){
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
-    }
+    private JdbcTemplate jdbcTemplate;
+
+//    @Autowired
+//    public ImageDao(DataSource dataSource){
+//        this.jdbcTemplate = new JdbcTemplate(dataSource);
+//    }
 
 
     class ImageRowMapper implements RowMapper<ImageDto>{
