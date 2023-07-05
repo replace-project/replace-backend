@@ -10,11 +10,11 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class ImageDto {
     private Long imageId;
-    private String url;
+    private String filename;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    public ImageDto(String url){
-        this.url = url;
+    public ImageDto(String filename){
+        this.filename = filename;
     }
 }

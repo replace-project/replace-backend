@@ -36,7 +36,7 @@ public class ImageDao {
 
             ImageDto imageDto = new ImageDto(
                     rs.getLong("image_id"),
-                    rs.getString("url"),
+                    rs.getString("filename"),
                     rs.getTimestamp("created_at").toLocalDateTime(),
                     rs.getTimestamp("updated_at").toLocalDateTime()
             );
@@ -61,8 +61,8 @@ public class ImageDao {
 
 
     // Image 테이블에 새로운 행 insert.
-    public Long insertImage(String url){
-        String query = "insert into image(url) values(?)";
+    public Long insertImage(String filename){
+        String query = "insert into image(filename) values(?)";
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
@@ -70,7 +70,7 @@ public class ImageDao {
             @Override
             public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
                 PreparedStatement pstmt = con.prepareStatement(query, new String[]{"image_id"});
-                pstmt.setString(1, url);
+                pstmt.setString(1, filename);
 
                 return pstmt;
             }
