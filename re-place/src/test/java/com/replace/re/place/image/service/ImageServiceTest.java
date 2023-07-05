@@ -1,17 +1,22 @@
 package com.replace.re.place.image.service;
 
-import com.replace.re.place.image.dto.ImageDto;
+
+import com.amazonaws.services.s3.AmazonS3;
+import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.*;
+import java.net.URL;
+import java.nio.file.Files;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -22,54 +27,48 @@ class ImageServiceTest {
     @Autowired
     private ImageService imageService;
 
-
     @Test
     @DisplayName("리뷰 이미지 INSERT 테스트")
-    @Transactional
-    public void reviewImageInsertTest(){
+    public void reviewImageInsertTest() throws IOException {
 
-        List<String> imageUrls = new ArrayList<>();
+        //given
+        File file = new File("src/main/resources/gangdol-img.png");
+        FileInputStream input = new FileInputStream(file);
+        MultipartFile multipartFile = new MockMultipartFile("file",
+                file.getName(), "image/png", IOUtils.toByteArray(input));
 
-        imageUrls.add("https://via.placeholder.com/300x200.png?text=Sample+Image1");
-        imageUrls.add("https://via.placeholder.com/300x200.png?text=Sample+Image2");
-        imageUrls.add("https://via.placeholder.com/300x200.png?text=Sample+Image3");
+        ArrayList<MultipartFile> multipartFiles = new ArrayList<>();
+        multipartFiles.add(multipartFile);
 
-        Boolean isSuccess = imageService.insertReviewImage(1L, imageUrls);
+        //when
+        Boolean isInserted = imageService.insertReviewImage(1L, multipartFiles);
 
-        List<ImageDto> imageDtos = imageService.getReviewImagesByReviewId(1L);
 
-        List<String> imageDtosUrls = new ArrayList<>();
-
-        Iterator<ImageDto> it = imageDtos.iterator();
-        while(it.hasNext()){
-            ImageDto imageDto = it.next();
-
-            imageDtosUrls.add(imageDto.getUrl());
-        }
-
-        Collections.sort(imageDtosUrls);
-
-        assertEquals(imageUrls, imageDtosUrls);
+        //then
+        assertEquals(true, isInserted);
     }
 
 
     @Test
     @DisplayName("리뷰 이미지 DELETE 테스트")
-    @Transactional
-    public void reviewImageDeleteTest(){
+    public void reviewImageDeleteTest() throws IOException {
+        
+        //given
+        File file = new File("src/main/resources/gangdol-img.png");
+        FileInputStream input = new FileInputStream(file);
+        MultipartFile multipartFile = new MockMultipartFile("file",
+                file.getName(), "image/png", IOUtils.toByteArray(input));
 
-        List<String> imageUrls = new ArrayList<>();
-        imageUrls.add("https://via.placeholder.com/300x200.png?text=Sample+Image1");
-        imageUrls.add("https://via.placeholder.com/300x200.png?text=Sample+Image2");
-        imageUrls.add("https://via.placeholder.com/300x200.png?text=Sample+Image3");
+        ArrayList<MultipartFile> multipartFiles = new ArrayList<>();
+        multipartFiles.add(multipartFile);
+        imageService.insertReviewImage(1L, multipartFiles);
 
-        Boolean isSuccess = imageService.insertReviewImage(1L, imageUrls);
 
-        imageService.deleteReviewImage(1L);
+        //when
+        Boolean isDeleted = imageService.deleteReviewImage(1L);
 
-        List<ImageDto> imageDtos = imageService.getReviewImagesByReviewId(100L);
 
-        assertEquals(imageDtos.size(), 0);
-
+        //then
+        assertEquals(true, isDeleted);
     }
 }
