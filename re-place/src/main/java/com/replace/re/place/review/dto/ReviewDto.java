@@ -21,16 +21,11 @@ public class ReviewDto {
     public LocalDateTime updatedAt;
     private Integer valid;
 
-    public ReviewDto(Long storeId, Long userId, String title, String content, Long viewCount, Long likeCount, LocalDateTime createdAt, LocalDateTime updatedAt, Integer valid) {
+    public ReviewDto(Long storeId, Long userId, String title, String content) {
         // reviewId 사용 X
         this.storeId = storeId;
         this.userId = userId;
         this.title = title;
         this.content = content;
-        this.viewCount = viewCount;
-        this.likeCount = likeCount;
-        this.createdAt = createdAt;
-        this.updatedAt = updatedAt;
-        this.valid = valid;
     }
 }

@@ -21,12 +21,9 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ReviewDao {
 
-    private final JdbcTemplate jdbcTemplate;
 
-    @Autowired
-    public ReviewDao(DataSource dataSource){
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
-    }
+    private final JdbcTemplate jdbcTemplate;
+    
 
     public class ReviewRowMapper implements RowMapper<ReviewDto> {
         @Override
@@ -42,7 +39,6 @@ public class ReviewDao {
                     rs.getTimestamp("CREATED_AT").toLocalDateTime(),
                     rs.getTimestamp("UPDATED_AT").toLocalDateTime(),
                     rs.getInt("VALID"));
-            reviewDto.setStoreId(rs.getLong("STORE_ID"));
             return reviewDto;
         }
     }
@@ -69,14 +65,11 @@ public class ReviewDao {
             @Override
             public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
                 PreparedStatement pstmt = con.prepareStatement(
-                        "insert into review (STORE_ID, USER_ID, TITLE, CONTENT, VIEW_COUNT, LIKE_COUNT, VALID) values (?, ?, ?, ?, ?, ?, ?)", new String[]{"REVIEW_ID"});
+                        "insert into review (STORE_ID, USER_ID, TITLE, CONTENT) values (?, ?, ?, ?)", new String[]{"REVIEW_ID"});
                 pstmt.setLong(1, reviewDto.getStoreId());
                 pstmt.setLong(2, reviewDto.getUserId());
                 pstmt.setString(3, reviewDto.getTitle());
                 pstmt.setString(4, reviewDto.getContent());
-                pstmt.setLong(5, reviewDto.getViewCount());
-                pstmt.setLong(6, reviewDto.getLikeCount());
-                pstmt.setInt(7, reviewDto.getValid());
 
                 return pstmt;
             }
@@ -86,14 +79,21 @@ public class ReviewDao {
     }
 
     // 2-4. review_id(review 테이블 PK)를 받아 review 테이블에서 해당되는 행을 삭제하는 메서드 구현. (실제 delete 문을 사용하는 것이 아니고, valid 컬럼 값을 0으로 update)
-    public void deleteReview(ReviewDto reviewDto) {
-        jdbcTemplate.update("update review set VALID = 0 where REVIEW_ID = ? and VALID = 1", reviewDto.getValid(), reviewDto.getReviewId());
+    public Boolean deleteReview(Long reviewId) {
+        return jdbcTemplate.update("update review set VALID = 0 where REVIEW_ID = ? and VALID = 1", reviewId) == 1;
     }
 
     // 2-5. pk, 제목, 내용을 받아 review 테이블에서 해당 pk에 해당되는 행의 정보(제목, 내용)을 update 하는 메서드 구현.
     public void updateReview(ReviewDto reviewDto) {
         // jdbcTemplate.update("insert into REVIEW (REVIEW_ID, TITLE, CONTENT) values (?, ?, ?)");
-        jdbcTemplate.update("update review set TITLE = ?, CONTENT = ? where REVIEW_ID = ? and VALID = 1"); // reviewId 지정해서 title이랑 content에 값 집어넣기
+        jdbcTemplate.update("update review set TITLE = ?, CONTENT = ? where REVIEW_ID = ? and VALID = 1", reviewDto.getTitle(), reviewDto.getContent(), reviewDto.getReviewId()); // reviewId 지정해서 title이랑 content에 값 집어넣기
+    }
+
+
+    public Boolean checkReviewExist(Long reviewId){
+        String query = "select if(exists(select * from review where review_id = ? and valid = 1), 1, 0)";
+
+        return this.jdbcTemplate.queryForObject(query, Integer.class, reviewId) == 1;
     }
 
 }
