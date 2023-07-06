@@ -4,10 +4,15 @@ import com.replace.re.place.category.dao.CategoryDao;
 import com.replace.re.place.category.dto.CategoryDto;
 import com.replace.re.place.global.ErrorCode;
 import com.replace.re.place.global.exception.category.CategoryNotCreatedException;
+import com.replace.re.place.global.exception.category.CategoryNotDeletedException;
+import com.replace.re.place.global.exception.category.CategoryNotFoundException;
 import com.replace.re.place.global.exception.category.ReviewCategoryNotCreatedException;
+import com.replace.re.place.global.exception.review.ReviewNotFoundException;
+import com.replace.re.place.review.dao.ReviewDao;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -18,6 +23,7 @@ import static com.replace.re.place.global.ErrorCode.*;
 public class CategoryService {
 
     private final CategoryDao categoryDao;
+    private final ReviewDao reviewDao;
 
 
     // 모든 카테고리 목록 조회
@@ -25,11 +31,6 @@ public class CategoryService {
         return categoryDao.getAllCategory();
     }
 
-
-    // 어느 review에 속하는 카테고리 목록 조회
-    public List<CategoryDto> getCategoriesByReviewId(Long reviewId){
-        return categoryDao.getCategoriesByReviewId(reviewId);
-    }
 
 
     // reviewId를 가지는 review에 소속되는 다수의 카테고리 등록
@@ -71,21 +72,60 @@ public class CategoryService {
     }
 
 
+
+    // reviewId를 가지는 review에 소속되는 다수의 카테고리 반환.
+    public List<CategoryDto> getReviewCategories(Long reviewId){
+
+        Boolean isReviewExist = reviewDao.checkReviewExist(reviewId);
+
+        if(isReviewExist) {
+            Boolean isReviewCategoryExist = categoryDao.checkReviewCategoryExistByReviewId(reviewId);
+
+            List<CategoryDto> categoryDtos = new ArrayList<>();
+
+            // 카테고리가 없더라도 예외 발생 X.
+            if (isReviewCategoryExist) {
+                categoryDtos = categoryDao.getCategoriesByReviewId(reviewId);
+            }
+
+            return categoryDtos;
+        }
+
+        throw new ReviewNotFoundException(REVIEW_NOT_FOUND);
+    }
+
+
     // reviewId를 가지는 review의 카테고리 전부 삭제.
     public Boolean deleteReviewCategory(Long reviewId){
 
-        List<CategoryDto> categoryDtos = categoryDao.getCategoriesByReviewId(reviewId);
 
-        Boolean isDeleted = categoryDao.deleteReviewCategoryByReviewId(reviewId);
-        if(isDeleted){
+        Boolean isReviewCategoryExist = categoryDao.checkReviewCategoryExistByReviewId(reviewId);
+
+        //리뷰에 카테고리가 한 개도 없을 수 있기 때문에, 리뷰 카테고리가 없더라도 예외발생 X.
+        if(isReviewCategoryExist) {
+            List<CategoryDto> categoryDtos = categoryDao.getCategoriesByReviewId(reviewId);
+
+            categoryDao.deleteReviewCategoryByReviewId(reviewId);
+
+
             Iterator<CategoryDto> it = categoryDtos.iterator();
-            while(it.hasNext()){
+            while (it.hasNext()) {
                 CategoryDto categoryDto = it.next();
                 Long categoryId = categoryDto.getCategoryId();
 
-                if(categoryDao.checkReviewCategoryExistByCategoryId(categoryId)){    // 삭제한 리뷰 내에서만 쓰이는 카테고리인 경우
-                    categoryDao.deleteCategory(categoryId);
+                Boolean isCategoryExist = categoryDao.checkCategoryExist(categoryId);
+                if(isCategoryExist) {
+                    if (categoryDao.checkReviewCategoryExistByCategoryId(categoryId)) {    // 삭제한 리뷰 내에서만 쓰이는 카테고리인 경우
+
+                        categoryDao.deleteCategory(categoryId);
+                        Boolean isCategoryDeleted = !categoryDao.checkCategoryExist(categoryId);
+                        if(!isCategoryDeleted){
+                            throw new CategoryNotDeletedException(CATEGORY_NOT_DELETED);
+                        }
+                    }
                 }
+
+                throw new CategoryNotFoundException(CATEGORY_NOT_FOUND);
             }
         }
 

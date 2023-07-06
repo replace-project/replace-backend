@@ -4,9 +4,13 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.replace.re.place.global.ErrorCode;
 import com.replace.re.place.global.exception.image.ImageNotCreatedException;
+import com.replace.re.place.global.exception.image.ImageNotDeletedException;
+import com.replace.re.place.global.exception.image.ImageNotFoundException;
 import com.replace.re.place.global.exception.image.ReviewImageNotCreatedException;
+import com.replace.re.place.global.exception.review.ReviewNotFoundException;
 import com.replace.re.place.image.dao.ImageDao;
 import com.replace.re.place.image.dto.ImageDto;
+import com.replace.re.place.review.dao.ReviewDao;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -24,6 +28,7 @@ import static com.replace.re.place.global.ErrorCode.*;
 public class ImageService {
 
     private final ImageDao imageDao;
+    private final ReviewDao reviewDao;
 
     private final AmazonS3 amazonS3;
 
@@ -67,9 +72,38 @@ public class ImageService {
         return true;
     }
 
+    public List<String> getReviewImages(Long reviewId){
+
+        Boolean isReviewExist = reviewDao.checkReviewExist(reviewId);
+
+        if(isReviewExist) {
+            List<String> result = new ArrayList<>();
+
+            List<ImageDto> imageDtos = imageDao.getReviewImagesByReviewId(reviewId);
+
+            Iterator<ImageDto> it = imageDtos.iterator();
+            while (it.hasNext()) {
+                ImageDto imageDto = it.next();
+
+                String filename = imageDto.getFilename();
+                String imageUrl = amazonS3.getUrl(bucket, filename).toString();
+
+                result.add(imageUrl);
+            }
+
+            return result;
+        }
+
+        throw new ReviewNotFoundException(REVIEW_NOT_FOUND);
+    }
+
 
     public Boolean deleteReviewImage(Long reviewId){
-        if(imageDao.checkReviewImageExist(reviewId)){
+
+        Boolean isReviewImageExist = imageDao.checkReviewImageExist(reviewId);
+
+        //리뷰에 이미지가 한 개도 없을 수 있기 때문에, 리뷰 이미지가 없더라도 예외발생 X.
+        if(isReviewImageExist){
             List<ImageDto> reviewImageDtos = imageDao.getReviewImagesByReviewId(reviewId);
 
             imageDao.deleteReviewImageByReviewId(reviewId);
@@ -77,11 +111,23 @@ public class ImageService {
             Iterator<ImageDto> it = reviewImageDtos.iterator();
             while(it.hasNext()){
                 ImageDto imageDto = it.next();
+                Long imageId = imageDto.getImageId();
+                String filename = imageDto.getFilename();
 
                 //s3에서 삭제
-                amazonS3.deleteObject(bucket, imageDto.getFilename());
+                amazonS3.deleteObject(bucket, filename);
 
-                imageDao.deleteImageByImageId(imageDto.getImageId());
+                Boolean isImageExist = imageDao.checkImageExist(imageId);
+                if(isImageExist) {
+
+                    imageDao.deleteImageByImageId(imageId);
+
+                    Boolean isImageDeleted = !imageDao.checkImageExist(imageId);
+                    if(!isImageDeleted){
+                        throw new ImageNotDeletedException(IMAGE_NOT_DELETED);
+                    }
+                }
+                throw new ImageNotFoundException(IMAGE_NOT_FOUND);
             }
         }
 
