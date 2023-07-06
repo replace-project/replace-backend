@@ -25,7 +25,7 @@ public class ReviewService {
         if(!isCreated){
             throw new ReviewNotCreatedException(REVIEW_NOT_CREATEED);
         }
-        
+
         return reviewId;
     }
 }
