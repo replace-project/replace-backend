@@ -7,8 +7,10 @@ import com.replace.re.place.global.exception.image.ImageNotCreatedException;
 import com.replace.re.place.global.exception.image.ImageNotDeletedException;
 import com.replace.re.place.global.exception.image.ImageNotFoundException;
 import com.replace.re.place.global.exception.image.ReviewImageNotCreatedException;
+import com.replace.re.place.global.exception.review.ReviewNotFoundException;
 import com.replace.re.place.image.dao.ImageDao;
 import com.replace.re.place.image.dto.ImageDto;
+import com.replace.re.place.review.dao.ReviewDao;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -26,6 +28,7 @@ import static com.replace.re.place.global.ErrorCode.*;
 public class ImageService {
 
     private final ImageDao imageDao;
+    private final ReviewDao reviewDao;
 
     private final AmazonS3 amazonS3;
 
@@ -67,6 +70,31 @@ public class ImageService {
         }
 
         return true;
+    }
+
+    public List<String> getReviewImages(Long reviewId){
+
+        Boolean isReviewExist = reviewDao.checkReviewExist(reviewId);
+
+        if(isReviewExist) {
+            List<String> result = new ArrayList<>();
+
+            List<ImageDto> imageDtos = imageDao.getReviewImagesByReviewId(reviewId);
+
+            Iterator<ImageDto> it = imageDtos.iterator();
+            while (it.hasNext()) {
+                ImageDto imageDto = it.next();
+
+                String filename = imageDto.getFilename();
+                String imageUrl = amazonS3.getUrl(bucket, filename).toString();
+
+                result.add(imageUrl);
+            }
+
+            return result;
+        }
+
+        throw new ReviewNotFoundException(REVIEW_NOT_FOUND);
     }
 
 

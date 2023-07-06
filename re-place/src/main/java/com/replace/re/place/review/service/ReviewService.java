@@ -45,8 +45,20 @@ public class ReviewService {
             }
 
 
-        }else{
-            throw new ReviewNotFoundException(REVIEW_NOT_FOUND);
         }
+        throw new ReviewNotFoundException(REVIEW_NOT_FOUND);
+
+    }
+
+
+    public ReviewDto getReview(Long reviewId){
+        Boolean isReviewExist = reviewDao.checkReviewExist(reviewId);
+
+        if(isReviewExist){
+            ReviewDto reviewDto = reviewDao.selectByReviewId(reviewId);
+
+            return reviewDto;
+        }
+        throw new ReviewNotFoundException(REVIEW_NOT_FOUND);
     }
 }

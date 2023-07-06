@@ -92,6 +92,13 @@ public class CategoryDao {
     }
 
 
+    public Boolean checkReviewCategoryExistByReviewId(Long reviewId){
+        String query ="select if(exists(select * from review_category where review_id = ?), 1, 0)";
+
+        return this.jdbcTemplate.queryForObject(query, Integer.class, reviewId) == 1;
+    }
+
+
     public List<CategoryDto> getAllCategory(){
         String query = "select * from category";
 
@@ -151,11 +158,6 @@ public class CategoryDao {
         return this.jdbcTemplate.queryForObject(query, Integer.class, categoryId) == 1;
     }
 
-    public Boolean checkReviewCategoryExistByReviewId(Long reviewId){
-        String query ="select if(exists(select * from review_category where review_id = ?), 1, 0)";
-
-        return this.jdbcTemplate.queryForObject(query, Integer.class, reviewId) == 1;
-    }
 
 
     public ReviewCategoryDto getReviewCategoryByReivewCategoryId(Long reviewCategoryId){
