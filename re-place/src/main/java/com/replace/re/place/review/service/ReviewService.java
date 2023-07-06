@@ -45,9 +45,9 @@ public class ReviewService {
             }
 
 
+        }else {
+            throw new ReviewNotFoundException(REVIEW_NOT_FOUND);
         }
-        throw new ReviewNotFoundException(REVIEW_NOT_FOUND);
-
     }
 
 

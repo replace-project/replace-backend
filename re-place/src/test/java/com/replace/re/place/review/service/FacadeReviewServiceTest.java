@@ -57,4 +57,20 @@ class FacadeReviewServiceTest {
         //then
         assertEquals(true, true);
     }
+
+    @Test
+    @DisplayName("FacadeReviewService - 리뷰 삭제 테스트")
+    void deleteReviewTest() {
+
+        //given
+        Long testReviewId = 21L;
+
+        //when
+        facadeReviewService.deleteReview(testReviewId);
+
+        //then
+        assertEquals(true, true);
+    }
+
+
 }
