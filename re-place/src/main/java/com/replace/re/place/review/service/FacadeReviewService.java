@@ -48,7 +48,7 @@ public class FacadeReviewService {
 
 
     @Transactional
-    public void deleteReview(Long reviewId){
+    public Boolean deleteReview(Long reviewId){
 
         // 이미지 삭제
         imageService.deleteReviewImage(reviewId);
@@ -61,6 +61,8 @@ public class FacadeReviewService {
 
         // 리뷰 삭제
         reviewService.deleteReview(reviewId);
+
+        return true;
     }
 
 

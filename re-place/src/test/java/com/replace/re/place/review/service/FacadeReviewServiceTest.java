@@ -66,11 +66,25 @@ class FacadeReviewServiceTest {
         Long testReviewId = 21L;
 
         //when
-        facadeReviewService.deleteReview(testReviewId);
+        Boolean isDeleted = facadeReviewService.deleteReview(testReviewId);
 
         //then
-        assertEquals(true, true);
+        assertEquals(true, isDeleted);
     }
 
+    @Test
+    @DisplayName("FacadeReviewService - 리뷰 상세 조회 테스트")
+    void getReviewTest() {
 
+        //given
+        Long testReviewId = 21L;
+
+        //when
+        GetDetailedReviewDto result = facadeReviewService.getReview(testReviewId);
+
+        System.out.println(result);
+
+        assertEquals(testReviewId, result.getReviewDto().getReviewId());
+
+    }
 }
