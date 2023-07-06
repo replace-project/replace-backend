@@ -26,7 +26,7 @@ public class FacadeReviewService {
 
 
     @Transactional
-    public void createReview(PostReviewDto postReviewDto) throws IOException {
+    public Long createReview(PostReviewDto postReviewDto) throws IOException {
         ReviewDto reviewDto = postReviewDto.getReviewDto();
 
         // 리뷰 생성
@@ -42,14 +42,13 @@ public class FacadeReviewService {
 
         // 공간 저장
         // ...
+
+        return reviewId;
     }
 
 
     @Transactional
-    public void deleteReview(Long reviewId){
-
-        // 리뷰 삭제
-        reviewService.deleteReview(reviewId);
+    public Boolean deleteReview(Long reviewId){
 
         // 이미지 삭제
         imageService.deleteReviewImage(reviewId);
@@ -59,6 +58,11 @@ public class FacadeReviewService {
 
         //공간 삭제
         // ...
+
+        // 리뷰 삭제
+        reviewService.deleteReview(reviewId);
+
+        return true;
     }
 
 

@@ -123,9 +123,9 @@ public class CategoryService {
                             throw new CategoryNotDeletedException(CATEGORY_NOT_DELETED);
                         }
                     }
+                }else{
+                    throw new CategoryNotFoundException(CATEGORY_NOT_FOUND);
                 }
-
-                throw new CategoryNotFoundException(CATEGORY_NOT_FOUND);
             }
         }
 

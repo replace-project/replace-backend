@@ -61,8 +61,8 @@ public class ImageService {
                 throw new ImageNotCreatedException(IMAGE_NOT_CREATED);
             }
 
-
             Long reviewImageId = imageDao.insertReivewImage(reviewId, imageId);
+
             Boolean isReviewImageCreated = imageDao.checkReviewImageExist(reviewImageId);
             if(!isReviewImageCreated){
                 throw new ReviewImageNotCreatedException(REVIEW_IMAGE_NOT_CREATED);
@@ -100,7 +100,7 @@ public class ImageService {
 
     public Boolean deleteReviewImage(Long reviewId){
 
-        Boolean isReviewImageExist = imageDao.checkReviewImageExist(reviewId);
+        Boolean isReviewImageExist = imageDao.checkReviewImageExistByReviewId(reviewId);
 
         //리뷰에 이미지가 한 개도 없을 수 있기 때문에, 리뷰 이미지가 없더라도 예외발생 X.
         if(isReviewImageExist){
@@ -126,8 +126,9 @@ public class ImageService {
                     if(!isImageDeleted){
                         throw new ImageNotDeletedException(IMAGE_NOT_DELETED);
                     }
+                }else {
+                    throw new ImageNotFoundException(IMAGE_NOT_FOUND);
                 }
-                throw new ImageNotFoundException(IMAGE_NOT_FOUND);
             }
         }
 

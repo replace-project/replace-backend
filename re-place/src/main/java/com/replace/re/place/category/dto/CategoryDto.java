@@ -1,14 +1,12 @@
 package com.replace.re.place.category.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString
 public class CategoryDto {
     private Long categoryId;
     private String categoryName;

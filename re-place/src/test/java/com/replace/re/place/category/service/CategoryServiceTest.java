@@ -50,7 +50,7 @@ class CategoryServiceTest {
 
         Boolean isInserted = categoryService.insertReviewCategory(1L, categoryNames);
 //        if(isInserted){
-            List<CategoryDto> categoryDtos = categoryService.getCategoriesByReviewId(1L);
+            List<CategoryDto> categoryDtos = categoryService.getReviewCategories(1L);
             assertEquals(categoryDtos.size(), categoryNames.size());
 //        }
     }
@@ -63,7 +63,7 @@ class CategoryServiceTest {
 
         Boolean isDeleted = categoryService.deleteReviewCategory(1L);
 //        if(isDeleted){
-            List<CategoryDto> categoryDtos = categoryService.getCategoriesByReviewId(1L);
+            List<CategoryDto> categoryDtos = categoryService.getReviewCategories(1L);
             assertEquals(0, categoryDtos.size());
 //        }
     }

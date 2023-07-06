@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString
 public class ReviewDto {
 
     private Long reviewId;
