@@ -2,11 +2,16 @@ package com.replace.re.place.category.service;
 
 import com.replace.re.place.category.dao.CategoryDao;
 import com.replace.re.place.category.dto.CategoryDto;
+import com.replace.re.place.global.ErrorCode;
+import com.replace.re.place.global.exception.category.CategoryNotCreatedException;
+import com.replace.re.place.global.exception.category.ReviewCategoryNotCreatedException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.Iterator;
 import java.util.List;
+
+import static com.replace.re.place.global.ErrorCode.*;
 
 @Service
 @RequiredArgsConstructor
@@ -41,11 +46,24 @@ public class CategoryService {
                 CategoryDto categoryDto = categoryDao.getCategoryByCategoryName(categoryName);
                 categoryId = categoryDto.getCategoryId();
 
-            }else{    //같은 이름의 카테고리가 존재하지 않을 경우
+            }else{    //같은 이름의 카테고리가 존재하지 않을 경우, 새롭게 생성
+
+                // category 테이블에 행 삽입.
                 categoryId = categoryDao.insertCategory(categoryName);
+                Boolean isCategoryCreated = categoryDao.checkCategoryExist(categoryId);
+
+                if(!isCategoryCreated){
+                    throw new CategoryNotCreatedException(CATEGORY_NOT_CREATED);
+                }
             }
 
+            // review_category 테이블에 행 삽입.
             Long reviewCategoryId = categoryDao.insertReviewCategory(reviewId, categoryId);
+
+            Boolean isReviewCategoryCreated = categoryDao.checkReviewCategoryExist(reviewCategoryId);
+            if(!isReviewCategoryCreated){
+                throw new ReviewCategoryNotCreatedException(REVIEW_CATEGORY_NOT_CREATED);
+            }
         }
 
         // 로직 추가 예정

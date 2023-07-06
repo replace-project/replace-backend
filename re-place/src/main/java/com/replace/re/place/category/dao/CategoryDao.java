@@ -68,11 +68,27 @@ public class CategoryDao {
         return categoryId;
     }
 
-    // Category 테이블에 인자로 주어진 문자열을 name으로 가지는 행이 있는지 여부 리턴.
+    // Category 테이블에 인자로 주어진 문자열을 name으로 가지는 행이 있는지의 여부를 리턴.
     public Boolean checkCategoryExistByCategoryName(String categoryName){
         String query = "select if(exists(select * from category where name = ?), 1, 0)";
 
         return this.jdbcTemplate.queryForObject(query, Integer.class, categoryName) == 1;
+    }
+
+
+    // Category 테이블에 인자로 주어진 category_id를 가지는 행이 있는지의 여부를 리턴.
+    public Boolean checkCategoryExist(Long categoryId){
+        String query = "select if(exists(select * from category where category_id = ?), 1, 0)";
+
+        return this.jdbcTemplate.queryForObject(query, Integer.class, categoryId) == 1;
+    }
+
+
+    // Category 테이블에 인자로 주어진 review_category_id를 가지는 행이 있는지의 여부를 리턴.
+    public Boolean checkReviewCategoryExist(Long reviewCategoryId){
+        String query = "select if(exists(select * from review_category where review_category_id = ?), 1, 0)";
+
+        return this.jdbcTemplate.queryForObject(query, Integer.class, reviewCategoryId) == 1;
     }
 
 
