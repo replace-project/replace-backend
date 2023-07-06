@@ -135,11 +135,19 @@ public class ImageDao {
     }
 
     // Review Image 테이블에서 fk인 review_id를 가지는 행이 존재하는지 여부를 리턴.
-    public Boolean checkReviewImageExist(Long reviewId){
+    public Boolean checkReviewImageExistByReviewId(Long reviewId){
 
         String query = "select if(exists(select * from review_image where review_id = ?), 1, 0)";
 
         return this.jdbcTemplate.queryForObject(query, Integer.class, reviewId) == 1;
+    }
+
+    // Review Image 테이블에서 pk인 review_image_id를 가지는 행이 존재하는지 여부를 리턴.
+    public Boolean checkReviewImageExist(Long reviewImageId){
+
+        String query = "select if(exists(select * from review_image where review_image_id = ?), 1, 0)";
+
+        return this.jdbcTemplate.queryForObject(query, Integer.class, reviewImageId) == 1;
     }
 
     // Image 테이블에서 pk인 image_id를 가지는 행이 존재하는지 여부를 리턴.
