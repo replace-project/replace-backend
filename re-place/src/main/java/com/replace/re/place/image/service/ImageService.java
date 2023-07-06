@@ -2,6 +2,9 @@ package com.replace.re.place.image.service;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.replace.re.place.global.ErrorCode;
+import com.replace.re.place.global.exception.image.ImageNotCreatedException;
+import com.replace.re.place.global.exception.image.ReviewImageNotCreatedException;
 import com.replace.re.place.image.dao.ImageDao;
 import com.replace.re.place.image.dto.ImageDto;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +17,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import static com.replace.re.place.global.ErrorCode.*;
+
 @Service
 @RequiredArgsConstructor
 public class ImageService {
@@ -24,36 +29,6 @@ public class ImageService {
 
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
-
-    /*
-    public List<String> getImage(Long ImageId){
-        ArrayList<String> images = new ArrayList<>();
-        images.add("https://via.placeholder.com/300x200.png?text=Sample+Image");
-
-        return images;
-    }
-
-    public List<ImageDto> getReviewImagesByReviewId(Long reviewId){
-        return imageDao.getReviewImagesByReviewId(reviewId);
-    }
-     */
-
-
-    // 이미지 개수, 크기 등의 제한은 컨트롤러 또는 클라이언트 단에서 처리해야할 것.
-//    public Boolean insertReviewImage(Long reviewId, List<String> imageUrls){
-//
-//        // 리뷰가 존재하는지에 대한 검증이 필요할 것.
-//
-//
-//        for(String imageUrl : imageUrls){
-//
-//            Long imageId = imageDao.insertImage(imageUrl);
-//
-//            Long reviewImageId = imageDao.insertReivewImage(reviewId, imageId);
-//        }
-//
-//        return true;
-//    }
 
 
     // 이미지 개수, 크기 등의 제한은 컨트롤러 또는 클라이언트 단에서 처리해야할 것.
@@ -74,8 +49,19 @@ public class ImageService {
 //            String imageUrl = amazonS3.getUrl(bucket, originalFilename).toString();
 
             // 데이터베이스에 기록
+
             Long imageId = imageDao.insertImage(originalFilename);
+            Boolean isImageCreated = imageDao.checkImageExist(imageId);
+            if(!isImageCreated){
+                throw new ImageNotCreatedException(IMAGE_NOT_CREATED);
+            }
+
+
             Long reviewImageId = imageDao.insertReivewImage(reviewId, imageId);
+            Boolean isReviewImageCreated = imageDao.checkReviewImageExist(reviewImageId);
+            if(!isReviewImageCreated){
+                throw new ReviewImageNotCreatedException(REVIEW_IMAGE_NOT_CREATED);
+            }
         }
 
         return true;
